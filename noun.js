@@ -57,6 +57,12 @@ Noun.prototype.equals = function(o) {
   }
 };
 
+Noun.prototype.edit = function(axis, value) {
+    if(axis instanceof Atom && axis.valueOf() === 1) {
+        return value;
+    }
+    throw new Error("Bail");
+};
 
 function _mug_fnv(has_w) {
   return Math.imul(has_w, 16777619);
@@ -129,6 +135,26 @@ Cell.prototype.unify = function(o) {
   }
 
   return false;
+};
+
+Cell.prototype.edit = function(axis, value) {
+    var that = this;
+    var ret = (function() {
+    if(axis instanceof Atom) {
+        if(axis.valueOf() === 1) {
+            return value;
+        } else if(axis.cap().valueOf() === 2) {
+            return new Cell(that.head.edit(axis.mas(), value), that.tail);
+        } else {
+            return new Cell(that.head, that.tail.edit(axis.mas(), value));
+        }
+
+    }
+    throw new Error("Bail");
+    })();
+    //console.log({axis: axis.toString(), t: this.toString(), value: value.toString(), product: ret.toString()});
+    return ret;
+
 };
 
 function Atom(number) {
