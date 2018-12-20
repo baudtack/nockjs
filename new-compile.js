@@ -109,7 +109,7 @@ Nock2Head.prototype.constructor = Nock2Head;
 Nock2Head.prototype.execute = function(subject) {
     var sub = this.subject.bounce(subject);
     var form = this.formula.bounce(subject);
-    var ast = this.context.getAst(form);
+    var ast = form.getAst(this.context);
     return ast.bounce(sub);
 };
 
@@ -127,7 +127,7 @@ Nock2Tail.prototype.constructor = Nock2Tail;
 Nock2Tail.prototype.execute = function(subject) {
     var sub = this.subject.bounce(subject);
     var form = this.formula.bounce(subject);
-    var ast = this.context.getAst(form);
+    var ast = form.getAst(this.context);
     return new Trampoline(ast, sub);
 };
 
@@ -245,7 +245,7 @@ Nock9Head.prototype.constructor = Nock9Head;
 Nock9Head.prototype.execute = function(subject) {
     var core = this.core.execute(subject);
     var f = this.fragmenter(core);
-    var ast = this.context.getAst(f);
+    var ast = f.getAst(this.context);
     return ast.bounce(core);
 };
 
@@ -263,7 +263,7 @@ Nock9Tail.prototype.constructor = Nock9Tail;
 Nock9Tail.prototype.execute = function(subject) {
     var core = this.core.execute(subject);
     var f = this.fragmenter(core);
-    var ast = this.context.getAst(f);
+    var ast = f.getAst(this.context);
     return new Trampoline(ast, core);
 };
 
@@ -397,7 +397,7 @@ Context.prototype.compile = function(formula, is_tail) {
 }
 
 Context.prototype.nock = function(subject, formula) {
-    return this.getAst(formula).bounce(subject);
+    return formula.getAst(this).bounce(subject);
 };
 
 module.exports = {

@@ -64,6 +64,10 @@ Noun.prototype.edit = function(axis, value) {
     throw new Error("Bail");
 };
 
+Noun.prototype.getAst = function(context) {
+    throw new Error("Bail");
+};
+
 function _mug_fnv(has_w) {
   return Math.imul(has_w, 16777619);
 }
@@ -156,6 +160,32 @@ Cell.prototype.edit = function(axis, value) {
     return ret;
 
 };
+
+Cell.prototype.getMeta = function(context) {
+    if(this.hasOwnProperty('meta') && this.meta.context === context) {
+        return this.meta;
+    } else {
+        return new CellMeta(context, this);
+    }
+};
+
+Cell.prototype.getAst = function(context) {
+    return this.getMeta(context).getAst();
+};
+
+function CellMeta(context, cell) {
+    this.context = context;
+    this.cell = cell;
+}
+
+CellMeta.prototype.getAst = function() {
+    if(!this.hasOwnProperty('ast')) {
+        this.ast = this.context.getAst(this.cell);
+    }
+
+    return this.ast;
+};
+
 
 function Atom(number) {
   Noun.call(this);
