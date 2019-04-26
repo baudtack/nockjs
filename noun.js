@@ -1,4 +1,5 @@
 var BigInteger = require('jsbn').BigInteger;
+var bits = require('./bits.js');
 
 function Noun() {
   this._mug = 0;
@@ -193,6 +194,16 @@ function Atom(number) {
 }
 Atom.prototype = Object.create(Noun.prototype);
 Atom.prototype.constructor = Atom;
+
+Atom.prototype.requireInt = function(noun) {
+    if(noun instanceof Atom) {
+        if(bits.met(5, noun) <= 1) {
+            return noun.number.intValue();
+        }
+    } else {
+        throw new Error("Bail");
+    }
+};
 
 var small = new Array(256);
 (function() {
