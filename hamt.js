@@ -1,4 +1,4 @@
-/* keys can be any noun, values aren't constrained */
+/* keys can be any object with .equals() and .hashCode(), values aren't constrained */
 
 function Slot() {
 }
@@ -102,12 +102,12 @@ Single.prototype.get = function(key, lef, rem) {
   }
 };
 
-function NounMap() {
+function Hamt() {
   this.slots = new Array(64);
 }
 
-NounMap.prototype.insert = function(key, val) {
-  var m    = key.mug();
+Hamt.prototype.insert = function(key, val) {
+  var m    = key.hashCode();
   var inx  = m >>> 25;
   var sot  = this.slots;
   if ( undefined === sot[inx] ) {
@@ -119,8 +119,8 @@ NounMap.prototype.insert = function(key, val) {
   }
 };
 
-NounMap.prototype.get = function(key) {
-  var m = key.mug();
+Hamt.prototype.get = function(key) {
+  var m = key.hashCode();
   var inx = m >>> 25;
   var sot = this.slots[inx];
   if ( undefined === sot ) {
@@ -133,5 +133,5 @@ NounMap.prototype.get = function(key) {
 };
 
 module.exports = {
-  NounMap: NounMap
+  Hamt: Hamt
 };
