@@ -176,6 +176,10 @@ Cell.prototype.getCallTarget = function(context) {
     return this.functionCache.callTarget;
 };
 
+Cell.prototype.hasCachedFunction = function(context) {
+    return this.hasOwnProperty("functionCache") && this.functionCache.compatible(context);
+};
+
 //NockFunction in jaque
 function FunctionCache(context, callTargetFactory, callTarget) {
     this.context = context;
@@ -187,6 +191,10 @@ FunctionCache.prototype.compatible = function(context) {
     return this.context === context;
 };
 
+FunctionCache.prototype.forContext = function(context) {
+    var f = this.callTargetFactory;
+    return new FunctionCache(context, f, f(context));
+};
 
 
 // Cell.prototype.getMeta = function(context) {

@@ -12,16 +12,15 @@ NockContext.prototype.nock = function(subject, formula) {
 };
 
 NockContext.prototype.getFunctionCache = function(cell) {
-    var pair = this.formulaCache.get(cell);
+    var fc = this.formulaCache.get(cell);
 
-    if(!pair) {
+    if(!fc) {
         var f = FormulaParser.parse(cell);
-        pair = { factory: f,
-                 callTarget: f(this) };
-        this.formulaCache.insert(cell, pair);
+        fc = new noun.FunctionCache(this, f, f(this));
+        this.formulaCache.insert(cell, fc);
     }
 
-    return new noun.FunctionCache(this, pair.factory, pair.callTarget);
+    return fc;
 };
 
 module.exports = {
