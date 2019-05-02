@@ -1,23 +1,29 @@
-function NockContext(callTargetStore, dashboard) {
-    this.asts = new Hamt();
-    this.astContext = callTargetStore.getAstContext(dashboard);
-}
+var noun = require('./noun.js'),
+    hamt = require('./hamt.js'),
+    FormulaParser = require('./FormulaParser.js');
 
-NockContext.prototype.getCallTarget = function(formula) {
-    var f = this.asts.get(formula);
-    if(f) {
-        f = this.compile(formula, true);
-        this.asts.insert(formula, ast);
-    }
-    return f;
-};
+function NockContext(dashboard) {
+    this.formulaCache = new hamt.Hamt();
+    this.dashboard = dashboard;
+}
 
 NockContext.prototype.nock = function(subject, formula) {
     return formula.getCallTarget(this).bounce(subject);
 };
 
 NockContext.prototype.getFunctionCache = function(cell) {
-    var callTargetFactory = FormulaParser.parse(cell);
-    //FormulaParser needs implemented
-    //make a FunctionCache
+    var pair = this.formulaCache.get(cell);
+
+    if(!pair) {
+        var f = FormulaParser.parse(cell);
+        pair = { factory: f,
+                 callTarget: f(this) };
+        this.formulaCache.insert(cell, pair);
+    }
+
+    return new noun.FunctionCache(this, pair.factory, pair.callTarget);
 };
+
+module.exports = {
+    NockContext: NockContext
+}

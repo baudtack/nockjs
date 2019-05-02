@@ -164,24 +164,28 @@ Cell.prototype.edit = function(axis, value) {
 
 };
 
-Cell.prototype.getCallTarget = function(astContext) {
+Cell.prototype.getCallTarget = function(context) {
     if(this.hasOwnProperty("functionCache")) {
-        if(!this.functionCache.compatible(astContext)) {
-            this.functionCache = this.functionCache.forContext(astContext);
+        if(!this.functionCache.compatible(context)) {
+            this.functionCache = this.functionCache.forContext(context);
         }
 
     } else {
-        this.functionCache = astContext.getFunctionCache(this);
+        this.functionCache = context.getFunctionCache(this);
     }
     return this.functionCache.callTarget;
 };
 
 //NockFunction in jaque
-function FunctionCache(astContext, callTargetFactory) {
-    this.astContext = astContext;
+function FunctionCache(context, callTargetFactory, callTarget) {
+    this.context = context;
     this.callTargetFactory = callTargetFactory;
-    this.callTarget = callTargetFactory(astContext);
+    this.callTarget = callTarget;
 }
+
+FunctionCache.prototype.compatible = function(context) {
+    return this.context === context;
+};
 
 
 
@@ -459,4 +463,5 @@ module.exports = {
 		fromInt:    i,
 		fromString: s,
 	},
+  FunctionCache: FunctionCache
 };
