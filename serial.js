@@ -7,7 +7,7 @@ var noun    = require('./noun.js'),
     i       = noun.Atom.fromInt,
     two     = i(2),
     three   = i(3),
-    NounMap = require('./hamt.js').NounMap;
+    Hamt = require('./hamt.js').Hamt;
 
 function rub(a, b) {
 	var c, d, e, w, x, y, z, p, q, m;
@@ -88,7 +88,7 @@ function cue_in(m, a, b) {
 }
 
 function cue(a) {
-  return cue_in(new NounMap(), a, zero).tail.head;
+  return cue_in(new Hamt(), a, zero).tail.head;
 }
 
 function mat(a) {
@@ -154,7 +154,7 @@ function _jam_in(m, a, b, l) {
 }
 
 function jam(n) {
-  var x = _jam_in(new NounMap(), n, zero, zero),
+  var x = _jam_in(new Hamt(), n, zero, zero),
       q = list.flop(x.tail.head);
 
   return bits.can(zero, q);

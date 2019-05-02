@@ -1,5 +1,5 @@
 var noun = require('./noun.js'),
-    NounMap = require('./hamt.js').NounMap,
+    Hamt = require('./hamt.js').Hamt,
     list = require('./list.js'),
     Noun = noun.Noun,
     Atom = noun.Atom.Atom,
@@ -534,9 +534,9 @@ function collectFromCore(prefix, spec, out) {
 }
 
 function Context(drivers) {
-  this.memo    = new NounMap();
-  this.clues   = new NounMap();
-  this.dash    = new NounMap();
+  this.memo    = new Hamt();
+  this.clues   = new Hamt();
+  this.dash    = new Hamt();
   this.tax     = noun.Atom.yes;
   this.drivers = {};
   if ( drivers ) {

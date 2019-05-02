@@ -1,5 +1,5 @@
 var BigInteger = require('jsbn').BigInteger;
-var bits = require('./bits.js');
+//var bits = require('./bits.js');
 
 function Noun() {
   this._mug = 0;
@@ -25,6 +25,8 @@ Noun.prototype.mug = function () {
 Noun.prototype.mugged = function () {
   return 0 !== this._mug;
 };
+
+Noun.prototype.hashCode = Noun.prototype.mug;
 
 Noun.prototype.deep = false;
 Noun.prototype.bump = function () {
@@ -162,30 +164,51 @@ Cell.prototype.edit = function(axis, value) {
 
 };
 
-Cell.prototype.getMeta = function(context) {
-    if(this.hasOwnProperty('meta') && this.meta.context === context) {
-        return this.meta;
+Cell.prototype.getCallTarget = function(astContext) {
+    if(this.hasOwnProperty("functionCache")) {
+        if(!this.functionCache.compatible(astContext)) {
+            this.functionCache = this.functionCache.forContext(astContext);
+        }
+
     } else {
-        return new CellMeta(context, this);
+        this.functionCache = astContext.getFunctionCache(this);
     }
+    return this.functionCache.callTarget;
 };
 
-Cell.prototype.getAst = function(context) {
-    return this.getMeta(context).getAst();
-};
-
-function CellMeta(context, cell) {
-    this.context = context;
-    this.cell = cell;
+//NockFunction in jaque
+function FunctionCache(astContext, callTargetFactory) {
+    this.astContext = astContext;
+    this.callTargetFactory = callTargetFactory;
+    this.callTarget = callTargetFactory(astContext);
 }
 
-CellMeta.prototype.getAst = function() {
-    if(!this.hasOwnProperty('ast')) {
-        this.ast = this.context.getAst(this.cell);
-    }
 
-    return this.ast;
-};
+
+// Cell.prototype.getMeta = function(context) {
+//     if(this.hasOwnProperty('meta') && this.meta.context === context) {
+//         return this.meta;
+//     } else {
+//         return new CellMeta(context, this);
+//     }
+// };
+
+// Cell.prototype.getAst = function(context) {
+//     return this.getMeta(context).getAst();
+// };
+
+// function CellMeta(context, cell) {
+//     this.context = context;
+//     this.cell = cell;
+// }
+
+// CellMeta.prototype.getAst = function() {
+//     if(!this.hasOwnProperty('ast')) {
+//         this.ast = this.context.getAst(this.cell);
+//     }
+
+//     return this.ast;
+// };
 
 
 function Atom(number) {
@@ -195,9 +218,17 @@ function Atom(number) {
 Atom.prototype = Object.create(Noun.prototype);
 Atom.prototype.constructor = Atom;
 
+function met(a, b) {
+  var bits = b.number.bitLength(),
+      full = bits >>> a,
+      part = (full << a) !== bits;
+
+  return part ? full + 1 : full;
+}
+
 Atom.prototype.requireInt = function(noun) {
     if(noun instanceof Atom) {
-        if(bits.met(5, noun) <= 1) {
+        if(met(5, noun) <= 1) {
             return noun.number.intValue();
         }
     } else {

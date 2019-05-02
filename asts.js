@@ -1,6 +1,5 @@
 /*
-  TODO save ast for nock formula on cells
-  TODO nock hints, at least fast
+  TODO nock hints, at least fast Dave tries to do this bit by himself. Good luck, future Dave.
   TODO Jets
   TODO run ackerman test
   TODO hashboard maybe
@@ -10,8 +9,9 @@
   TODO be sad because it's slow
 */
 
-var NounMap = require('./hamt.js').NounMap,
+var Hamt = require('./hamt.js').Hamt,
     noun = require('./noun.js'),
+    bits = require('./bits.js'),
     Noun = noun.Noun,
     Cell = noun.Cell,
     Atom = noun.Atom;
@@ -109,7 +109,7 @@ Nock2Head.prototype.constructor = Nock2Head;
 Nock2Head.prototype.execute = function(subject) {
     var sub = this.subject.bounce(subject);
     var form = this.formula.bounce(subject);
-    var ast = form.getAst(this.context);
+    var ast = form.getCallTarget(this.context);
     return ast.bounce(sub);
 };
 
@@ -300,106 +300,31 @@ Nock11Toss.prototype.execute = function(subject) {
     return this.g.execute(subject);
 };
 
-
-function Context() {
-    this.asts = new NounMap();
+function AstContext() {
+    this.callTargets = new Hamt();
+    //map of location -> axismap of call targets
+    this.drivers = new Map();
 }
 
-Context.prototype.getAst = function(formula) {
-    var f = this.asts.get(formula);
-    if(f) {
-        return f;
+AstContext.prototype.getCallTarget = function(cell) {
+
+};
+
+function CallTargetStore() {
+    this.astContexts = new Map();
+}
+
+CallTargetStore.prototype.getAstContext = function(dashboard) {
+    if(this.astContexts.has(dashboard)) {
+        return this.astContexts.get(dashboard);
     } else {
-        var ast = this.compile(formula, true);
-        this.asts.insert(formula, ast);
-        return ast;
+        var astContext = new AstContext();
+        this.astContexts.set(dashboard, astContext);
+        return astContext;
     }
 };
 
-Context.prototype.compile = function(formula, is_tail) {
-  if(formula instanceof Cell) {
-        var opp = formula.head;
-        var arg = formula.tail;
-
-        if(opp instanceof Cell) {
-            //auto cons? wtf is that?
-            return new AutoCons(this.compile(opp, false),
-                                this.compile(arg, false));
-        } else {
-            switch(opp.valueOf()) {
-            case 0:  //fragment/slot/index/axis
-                return new Nock0(a(arg));
-            case 1:  //const
-                return new Nock1(arg);
-            case 2:  //nock
-                c(arg);
-                if(is_tail) {
-                    return new Nock2Tail(this.compile(arg.head, false),
-                                         this.compile(arg.tail, false), this);
-                } else {
-                    return new Nock2Head(this.compile(arg.head, false),
-                                         this.compile(arg.tail, false), this);
-                }
-            case 3:  //is cell
-                return new Nock3(this.compile(arg, false));
-            case 4:  //inc
-                return new Nock4(this.compile(arg, false));
-            case 5:  //equ
-                c(arg);
-                return new Nock5(this.compile(arg.head, false),
-                                 this.compile(arg.tail, false));
-            case 6:  //if-then-else
-                c(arg);
-                c(arg.tail);
-                return new Nock6(this.compile(arg.head, false),
-                                 this.compile(arg.tail.head, is_tail),
-                                 this.compile(arg.tail.tail, is_tail));
-            case 7:  //compose
-                c(arg);
-                return new Nock7(this.compile(arg.head, false),
-                                 this.compile(arg.tail, is_tail));
-            case 8:  //tislus
-                c(arg);
-                return new Nock8(this.compile(arg.head, false),
-                                 this.compile(arg.tail, is_tail));
-            case 9:  //kick
-                c(arg);
-                var f = this.compile(arg.tail, false);
-                if(is_tail) {
-                    return new Nock9Tail(arg.head, f, this);
-                } else {
-                    return new Nock9Head(arg.head, f, this);
-                }
-            case 10: //edit
-                c(arg);
-                c(arg.head);
-                a(arg.head.head);
-                return new Nock10(arg.head.head,
-                                  this.compile(arg.head.tail, false),
-                                  this.compile(arg.tail, false));
-            case 11: //hint
-                c(arg);
-                if(arg.head instanceof Atom.Atom) {
-                    return this.compile(arg.tail, is_tail);
-                } else if (arg.head instanceof Cell) {
-                    return new Nock11Toss(this.compile(arg.head.tail, false),
-                                          this.compile(arg.tail, is_tail));
-                }
-            case 12: //wish-upon-a-star
-                throw new Error("Bail");
-            default:
-                throw new Error("Bail");
-            }
-        }
-    } else {
-        throw new Error("Bail");
-    }
-}
-
-Context.prototype.nock = function(subject, formula) {
-    return formula.getAst(this).bounce(subject);
-};
 
 module.exports = {
-    Context: Context
+    CallTargetStore: CallTargetStore
 };

@@ -24,7 +24,7 @@
   $(m (dec m), n $(n (dec n)))
 --
 */
-var compiler   = require('../compiler.js'),
+var compiler   = require('../new-compile.js'),
     serial     = require('../serial.js'),
     noun       = require('../noun.js'),
     bits       = require('../bits.js'),
